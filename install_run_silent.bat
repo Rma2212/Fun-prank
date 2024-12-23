@@ -40,9 +40,9 @@ if not exist "history_report.py" (
     exit /b
 )
 
-:: Step 8: Convert the Python script to an executable using PyInstaller
+:: Step 8: Convert the Python script to an executable using PyInstaller with explicit imports
 echo Converting script to executable...
-pyinstaller --onefile --noconsole history_report.py
+pyinstaller --onefile --noconsole --hidden-import=requests --hidden-import=psutil --hidden-import=gpuinfo history_report.py
 
 :: Step 9: Check if the executable was created
 if not exist "dist\history_report.exe" (
@@ -61,7 +61,9 @@ rd /s /q "build"
 del /q "history_report.spec"
 
 :: Step 12: Clean up the downloaded files
-del history_report.py
-del install_run_silent.bat
+if exist "install_run_silent.bat" (
+    del install_run_silent.bat
+)
 
+del history_report.py
 pause
