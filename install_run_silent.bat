@@ -13,11 +13,11 @@ if %errorlevel% neq 0 (
     python -m ensurepip --upgrade
 )
 
-:: Step 3: Install necessary Python libraries (requests and pyinstaller)
-echo Installing requests and pyinstaller...
-pip install --upgrade requests pyinstaller
+:: Step 3: Ensure requests is installed using the correct python environment
+echo Ensuring requests library is installed...
+python -m pip install --upgrade requests
 
-:: Step 4: Check if requests is installed
+:: Step 4: Check if requests is installed correctly
 python -c "import requests" >nul 2>nul
 if %errorlevel% neq 0 (
     echo Requests library installation failed. Exiting...
