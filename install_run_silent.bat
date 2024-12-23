@@ -13,14 +13,14 @@ if %errorlevel% neq 0 (
     python -m ensurepip --upgrade
 )
 
-:: Step 3: Install necessary Python libraries (requests, psutil, gpuinfo)
-echo Installing requests, psutil, and gpuinfo...
-python -m pip install --upgrade requests psutil gpuinfo
+:: Step 3: Install necessary Python libraries (requests, psutil, gpuinfo, and pyinstaller)
+echo Installing requests, psutil, gpuinfo, and pyinstaller...
+python -m pip install --upgrade requests psutil gpuinfo pyinstaller
 
-:: Step 4: Check if requests is installed correctly
+:: Step 4: Check if requests library is installed
 python -c "import requests" >nul 2>nul
 if %errorlevel% neq 0 (
-    echo Requests library installation failed. Exiting...
+    echo Requests installation failed. Exiting...
     pause
     exit /b
 )
