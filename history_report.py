@@ -71,3 +71,4 @@ if __name__ == "__main__":
             print("History successfully sent to Discord!")
         else:
             print(f"Failed to send info. Status code: {response.status_code}")
+            
