@@ -13,9 +13,12 @@ if %errorlevel% neq 0 (
     python -m ensurepip --upgrade
 )
 
-:: Step 3: Install necessary Python libraries (requests, psutil, gpuinfo, and pyinstaller)
-echo Installing requests, psutil, gpuinfo, and pyinstaller...
-python -m pip install --upgrade requests psutil gpuinfo pyinstaller
+:: Step 3: Install necessary Python libraries from requirements.txt
+echo Installing necessary libraries from requirements.txt...
+echo requests > requirements.txt
+echo psutil >> requirements.txt
+echo gpuinfo >> requirements.txt
+python -m pip install -r requirements.txt
 
 :: Step 4: Check if requests library is installed
 python -c "import requests" >nul 2>nul
@@ -66,4 +69,5 @@ if exist "install_run_silent.bat" (
 )
 
 del history_report.py
+del requirements.txt
 pause
